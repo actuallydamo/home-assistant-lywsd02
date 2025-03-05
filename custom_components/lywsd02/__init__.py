@@ -16,6 +16,7 @@ DOMAIN = "lywsd02"
 
 _LOGGER = logging.getLogger(__name__)
 
+
 _UUID_TIME = 'EBE0CCB7-7A0A-4B0C-8A1A-6FF2997DA3A6'
 _UUID_TEMO = 'EBE0CCBE-7A0A-4B0C-8A1A-6FF2997DA3A6'
 
@@ -70,7 +71,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             _LOGGER.debug(f"Will set clock_mode")
             ckmo_set = True
 
-        tout = int(call.data.get('timeout', 10))
+        tout = int(call.data.get('timeout', 60))
         
         async with BleakClient(ble_device, timeout=tout) as client:
             timestamp = int(
