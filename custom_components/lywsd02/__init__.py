@@ -25,7 +25,9 @@ def get_localized_timestamp():
     utc = datetime.fromtimestamp(now, timezone.utc)
     local = datetime.fromtimestamp(now)
     diff = (local.replace(tzinfo=timezone.utc) - utc).total_seconds()
-    return int((utc + timedelta(seconds=diff)).timestamp())
+    diff_hours, diff_seconds = divmod(diff, 3600)
+    utc_timestamp = int((utc + timedelta(seconds=diff_seconds)).timestamp())
+    return utc_timestamp, int(diff_hours)
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """
@@ -82,10 +84,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 if tz_offset is not None:
                     timestamp = int(time.time())
                 else:
-                    tz_offset = 0
-                    timestamp = get_localized_timestamp()
+                    timestamp, tz_offset = get_localized_timestamp()
             elif tz_offset is None:
-                tz_offset = 0
+                _timestamp, tz_offset = get_localized_timestamp()
             data = struct.pack('Ib', timestamp, tz_offset)
             await client.write_gatt_char(_UUID_TIME, data)
             if temo_set:

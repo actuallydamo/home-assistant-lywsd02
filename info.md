@@ -36,9 +36,13 @@ data:
 
 `tz_offset` only accepts whole numbers.
 
-`tz_offset` will default to 0 (UTC).
+If you are in a whole number timezone (e.g. UTC+2, UTC-5):
+`tz_offset` defaults to your timezone offset.
+`timestamp` defaults to UTC.
 
-`timestamp` defaults to UTC (adjusted to local time unless `tz_offset` is set).
+If you are in a partial hour timezone (e.g. UTC+8:45, UTC-3:30):
+`tz_offset` defaults to rounding down your timezone offset.
+`timestamp` defaults to UTC + your partial hour offset.
 
 ## Timeout
 
