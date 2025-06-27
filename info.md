@@ -38,7 +38,7 @@ data:
 
 `tz_offset` will default to 0 (UTC).
 
-`timestamp` defaults to UTC adjusted to local time disregarding the `tz_offset` setting.
+`timestamp` defaults to UTC (adjusted to local time unless `tz_offset` is set).
 
 ## Timeout
 

@@ -39,7 +39,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             _LOGGER.error(f"The 'mac' parameter is missing from service call: {call.data}.")
             return
 
-        tz_offset = call.data.get('tz_offset', 0)
+        tz_offset = call.data.get('tz_offset')
+        tz_offset = int(tz_offset) if tz_offset is not None else None
+
+        timestamp = call.data.get('timestamp')
+        timestamp = int(timestamp) if timestamp is not None else None
 
         ble_device = bluetooth.async_ble_device_from_address(
             hass,
@@ -74,10 +78,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         tout = int(call.data.get('timeout', 60))
         
         async with BleakClient(ble_device, timeout=tout) as client:
-            timestamp = int(
-                call.data.get('timestamp') or get_localized_timestamp()
-            )
-
+            if not timestamp:
+                if tz_offset is not None:
+                    timestamp = int(time.time())
+                else:
+                    tz_offset = 0
+                    timestamp = get_localized_timestamp()
+            elif tz_offset is None:
+                tz_offset = 0
             data = struct.pack('Ib', timestamp, tz_offset)
             await client.write_gatt_char(_UUID_TIME, data)
             if temo_set:
