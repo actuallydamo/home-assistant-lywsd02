@@ -4,7 +4,7 @@ import time
 import struct
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from bleak import BleakClient
 
@@ -21,11 +21,11 @@ _UUID_TIME = 'EBE0CCB7-7A0A-4B0C-8A1A-6FF2997DA3A6'
 _UUID_TEMO = 'EBE0CCBE-7A0A-4B0C-8A1A-6FF2997DA3A6'
 
 def get_localized_timestamp():
-    now = int(time.time())
-    utc = datetime.utcfromtimestamp(now)
+    now = time.time()
+    utc = datetime.fromtimestamp(now, timezone.utc)
     local = datetime.fromtimestamp(now)
-    diff = (utc-local).seconds
-    return now - diff
+    diff = (local.replace(tzinfo=timezone.utc) - utc).total_seconds()
+    return int((utc + timedelta(seconds=diff)).timestamp())
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """
