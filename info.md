@@ -34,15 +34,13 @@ data:
   temp_mode: 'C'
 ```
 
-`tz_offset` only accepts whole numbers.
+If your system or supplied timezone is a whole hour (e.g. UTC+2, UTC-5):
+- `tz_offset` defaults to your timezone offset.
+- `timestamp` defaults to UTC.
 
-If you are in a whole number timezone (e.g. UTC+2, UTC-5):
-`tz_offset` defaults to your timezone offset.
-`timestamp` defaults to UTC.
-
-If you are in a partial hour timezone (e.g. UTC+8:45, UTC-3:30):
-`tz_offset` defaults to rounding down your timezone offset.
-`timestamp` defaults to UTC + your partial hour offset.
+If your system or supplied timezone is a partial hour (e.g. UTC+8:45, UTC-3:30):
+- `tz_offset` the offset is rounded down to a whole hour.
+- `timestamp` the partial hour is added to the timestamp.
 
 ## Timeout
 

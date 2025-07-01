@@ -29,6 +29,21 @@ def get_localized_timestamp():
     utc_timestamp = int((utc + timedelta(seconds=diff_seconds)).timestamp())
     return utc_timestamp, int(diff_hours)
 
+def parse_tz_offset(tz_offset):
+    if tz_offset is not None:
+        if isinstance(tz_offset, float) or (
+            isinstance(tz_offset, str) and "." in tz_offset
+        ):
+            offset_hours, offset_partial = divmod(float(tz_offset), 1)
+            tz_offset = int(offset_hours)
+            tz_offset_seconds = int(offset_partial * 3600)
+        else:
+            tz_offset = int(tz_offset)
+            tz_offset_seconds = 0
+    else:
+        tz_offset_seconds = 0
+    return tz_offset, tz_offset_seconds
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """
     Based off https://github.com/h4/lywsd02
@@ -42,10 +57,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return
 
         tz_offset = call.data.get('tz_offset')
-        tz_offset = int(tz_offset) if tz_offset is not None else None
+        tz_offset, tz_offset_seconds = parse_tz_offset(tz_offset)
 
         timestamp = call.data.get('timestamp')
-        timestamp = int(timestamp) if timestamp is not None else None
+        timestamp = int(timestamp) + tz_offset_seconds if timestamp is not None else None
 
         ble_device = bluetooth.async_ble_device_from_address(
             hass,
@@ -82,7 +97,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         async with BleakClient(ble_device, timeout=tout) as client:
             if not timestamp:
                 if tz_offset is not None:
-                    timestamp = int(time.time())
+                    timestamp = int(time.time()) + tz_offset_seconds
                 else:
                     timestamp, tz_offset = get_localized_timestamp()
             elif tz_offset is None:
